@@ -2,17 +2,22 @@ import { useEffect, useState } from "react";
 import ActivityCard from "./ActivityCard";
 import ActivityForm from "./ActivityForm";
 
+// osnovni URL za API klice
 const BASE_URL = "http://localhost:8080/api/activities";
 
+// komponenta za prikaz aktivnosti
 function ActivityList() {
-  const [activities, setActivities] = useState([]);
-  const [editingActivity, setEditingActivity] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  // stanja aplikacije
+  const [activities, setActivities] = useState([]); // seznam aktivnosti
+  const [editingActivity, setEditingActivity] = useState(null); // aktivnost, ki jo urejamo
+  const [showForm, setShowForm] = useState(false); // ali se obrazec prikazuje
 
+  // useEffect za inicialni fetch 
   useEffect(() => {
     fetchActivities();
   }, []);
 
+  // pridobi aktivnosti iz backend-a
   const fetchActivities = async () => {
     try {
       const res = await fetch(BASE_URL);
@@ -23,10 +28,11 @@ function ActivityList() {
     }
   };
 
+  // dodajanje ali urejanje aktivnosti
   const handleAddOrUpdate = async (activity) => {
     try {
       if (activity.id) {
-        // update
+        // uredi obstoječo aktivnost
         const res = await fetch(`${BASE_URL}/${activity.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -35,7 +41,7 @@ function ActivityList() {
         const updated = await res.json();
         setActivities(activities.map(a => a.id === updated.id ? updated : a));
       } else {
-        // add
+        // dodaj novo aktivnost
         const res = await fetch(BASE_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -44,6 +50,7 @@ function ActivityList() {
         const newAct = await res.json();
         setActivities([...activities, newAct]);
       }
+      // zapri obrazec po shranjevanju
       setShowForm(false);
       setEditingActivity(null);
     } catch (err) {
@@ -51,6 +58,7 @@ function ActivityList() {
     }
   };
 
+  // izbriši aktivnost
   const handleDelete = async (id) => {
     try {
       await fetch(`${BASE_URL}/${id}`, { method: "DELETE" });
@@ -60,25 +68,38 @@ function ActivityList() {
     }
   };
 
+  // uredi aktivnost
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setShowForm(true);
   };
 
+  // JSX za komponento
   return (
     <div>
-      <button onClick={() => { setEditingActivity(null); setShowForm(true); }}>
+      {/* gumb za dodajanje nove aktivnosti */}
+      <button
+        onClick={() => {
+          setEditingActivity(null);
+          setShowForm(true);
+        }}
+      >
         Dodaj novo aktivnost
       </button>
 
+      {/* obrazec za dodajanje/urejanje aktivnosti */}
       {showForm && (
         <ActivityForm
           activity={editingActivity}
           onSave={handleAddOrUpdate}
-          onCancel={() => { setShowForm(false); setEditingActivity(null); }}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingActivity(null);
+          }}
         />
       )}
 
+      {/* seznam aktivnosti */}
       {activities.map(act => (
         <ActivityCard
           key={act.id}

@@ -9,7 +9,7 @@ body {
   min-height: 100vh;
 }
 
-/* Animacija preliva ozadja */
+/* animacija preliva ozadja */
 @keyframes gradientShift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -275,7 +275,7 @@ textarea { resize: vertical; }
   font-style: italic;
 }
 
-/* Odstrani puščice za number input */
+/* odstrani puščice za number input */
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;

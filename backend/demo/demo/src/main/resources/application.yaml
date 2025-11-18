@@ -1,15 +1,26 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./data/activitiesdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:h2:file:./data/activitiesdb     # pot do H2 baze – datoteka se shrani v /data/activitiesdb
+    driver-class-name: org.h2.Driver          # H2 JDBC driver
+    username: sa                              # privzeti H2 uporabnik
+    password:                                 # brez gesla – dovoljeno za lokalni razvoj
+
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.H2Dialect  # hibernate uporabi dialekt za H2 bazo
     hibernate:
-      ddl-auto: update
+      ddl-auto: none                      # ne ustvarja / ne posodablja sheme – pričakuje obstoječo
+    show-sql: true                        # izpis SQL stavkov v konzoli
+
+  sql:
+    init:
+      mode: never     # baza se NE inicializira iz schema.sql ali data.sql
+      platform: h2    # določa platformo za SQL inicializacijske skripte (če bi bile vključene)
+
+# omogoča H2 web konzolo na /h2-console
   h2:
     console:
-      enabled: true
+      enabled: true   
+
+# aplikacija teče na portu 8080
 server:
-  port: 8080
+  port: 8080   

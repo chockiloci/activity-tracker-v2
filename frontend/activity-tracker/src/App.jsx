@@ -3,29 +3,33 @@ import "./App.css";
 import ActivityCard from "./components/ActivityCard";
 
 function App() {
-  const [activities, setActivities] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingActivity, setEditingActivity] = useState(null);
+  // stanja aplikacije 
+  const [activities, setActivities] = useState([]); // seznam aktivnosti
+  const [showForm, setShowForm] = useState(false); // ali se obrazec prikazuje
+  const [editingActivity, setEditingActivity] = useState(null); // aktivnost, ki se ureja
 
+  // polja za obrazec 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [duration, setDuration] = useState("");
   const [category, setCategory] = useState("Hobi");
-  const [categoryInput, setCategoryInput] = useState("");
+  const [categoryInput, setCategoryInput] = useState(""); // za "Drugo" kategorijo
 
-  // --- FE -> BE klici ---
+  // FE -> BE klici 
+  // pridobi vse aktivnosti iz backend-a
   const fetchActivities = async () => {
     try {
       const res = await fetch("http://localhost:8080/api/activities");
       const data = await res.json();
-      const upcoming = removePastActivities(data);
+      const upcoming = removePastActivities(data); // odstrani pretekle aktivnosti
       setActivities(upcoming);
     } catch (err) {
       console.error("Napaka pri nalaganju aktivnosti:", err);
     }
   };
 
+  // dodaj novo aktivnost
   const addActivityAPI = async (activity) => {
     try {
       const res = await fetch("http://localhost:8080/api/activities", {
@@ -34,12 +38,13 @@ function App() {
         body: JSON.stringify(activity),
       });
       const saved = await res.json();
-      setActivities((prev) => [...prev, saved]);
+      setActivities((prev) => [...prev, saved]); // dodaj v seznam
     } catch (err) {
       console.error("Napaka pri dodajanju aktivnosti:", err);
     }
   };
 
+  // posodobi aktivnost
   const updateActivityAPI = async (id, activity) => {
     try {
       const res = await fetch(`http://localhost:8080/api/activities/${id}`, {
@@ -56,6 +61,7 @@ function App() {
     }
   };
 
+  // izbriši aktivnost
   const deleteActivityAPI = async (id) => {
     try {
       await fetch(`http://localhost:8080/api/activities/${id}`, {
@@ -67,24 +73,39 @@ function App() {
     }
   };
 
-  // --- Odstrani pretekle aktivnosti ---
+  // odstrani pretekle aktivnosti 
   const removePastActivities = (list) => {
     const todayStr = new Date().toISOString().split("T")[0];
     return list.filter((a) => !a.date || a.date >= todayStr);
   };
 
-  // --- useEffect za inicialni fetch in samodejno brisanje preteklih ---
+  // useEffect za inicialni fetch in samodejno brisanje ob polnoči 
   useEffect(() => {
     fetchActivities();
 
-    const intervalId = setInterval(() => {
-      setActivities((prev) => removePastActivities(prev));
-    }, 60 * 60 * 1000); // enkrat na uro preveri pretekle aktivnosti
+    // načrtuj samodejno brisanje preteklih aktivnosti ob polnoči
+    const scheduleNextMidnightCheck = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0); // nastavi na polnoč
+      
+      const msUntilMidnight = tomorrow - now;
+      
+      const timeoutId = setTimeout(() => {
+        setActivities((prev) => removePastActivities(prev));
+        scheduleNextMidnightCheck(); // ponovno načrtuj za naslednjo polnoč
+      }, msUntilMidnight);
+      
+      return timeoutId;
+    };
 
-    return () => clearInterval(intervalId);
+    const timeoutId = scheduleNextMidnightCheck();
+
+    return () => clearTimeout(timeoutId); // počisti timeout ob unmountu
   }, []);
 
-  // --- Dodaj aktivnost ---
+  // dodaj aktivnost
   const addActivity = (e) => {
     e.preventDefault();
     if (!name) return alert("Ime aktivnosti mora biti vnešeno!");
@@ -107,7 +128,7 @@ function App() {
     resetForm();
   };
 
-  // --- Uredi aktivnost ---
+  // uredi aktivnost
   const editActivity = (activity) => {
     setEditingActivity(activity);
     setName(activity.name);
@@ -127,6 +148,7 @@ function App() {
     setShowForm(true);
   };
 
+  // posodobi aktivnost
   const updateActivity = (e) => {
     e.preventDefault();
     const selectedCategory = category === "Drugo" ? categoryInput : category;
@@ -141,16 +163,12 @@ function App() {
     resetForm();
   };
 
-  // --- Izbriši aktivnost ---
+  // izbriši aktivnost 
   const deleteActivity = (id) => {
-    if (
-      window.confirm("Ali res želiš izbrisati to aktivnost?")
-    ) {
-      deleteActivityAPI(id);
-    }
+    deleteActivityAPI(id);
   };
 
-  // --- Reset forme ---
+  // reset forme 
   const resetForm = () => {
     setEditingActivity(null);
     setName("");
@@ -162,7 +180,7 @@ function App() {
     setShowForm(false);
   };
 
-  // --- Urgentne aktivnosti in sortiranje ---
+  // sortiranje aktivnosti in označevanje urgentnih
   const sortedActivities = [...activities].sort((a, b) => {
     const now = new Date();
     const getIsSoon = (dateStr) => {
@@ -194,6 +212,7 @@ function App() {
         </button>
       </header>
 
+      {/* modal za dodajanje / urejanje */}
       {(showForm || editingActivity) && (
         <div className="modal-overlay" onClick={resetForm}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -253,6 +272,7 @@ function App() {
         </div>
       )}
 
+      {/* seznam aktivnosti */}
       <section className="activities-grid">
         {activities.length === 0 ? (
           <div className="no-activities">
