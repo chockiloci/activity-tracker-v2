@@ -118,6 +118,7 @@ Backend uporablja **H2 datotečno bazo**, kar pomeni, da se podatki **trajno shr
 
 
 ##  Struktura projekta
+```
 activity-tracker-v2/
 ├── frontend/
 │   └── activity-tracker/
