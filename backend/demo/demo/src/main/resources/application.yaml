@@ -8,12 +8,12 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect  # hibernate uporabi dialekt za H2 bazo
     hibernate:
-      ddl-auto: update                    # hibernate samodejno posodobi shemo baze glede na entitete
+      ddl-auto: validate                  # hibernate samodejno posodobi shemo baze glede na entitete
     show-sql: true                        # izpis SQL stavkov v konzoli
 
   sql:
     init:
-      mode: never     # onemogoči samodejno izvajanje SQL inicializacijskih skript
+      mode: always    # onemogoči samodejno izvajanje SQL inicializacijskih skript
       platform: h2    # določa platformo za SQL inicializacijske skripte (če bi bile vključene)
 
 # omogoča H2 web konzolo na /h2-console

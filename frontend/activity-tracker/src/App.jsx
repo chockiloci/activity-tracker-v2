@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import "./App.css";
 import ActivityCard from "./components/ActivityCard";
 
 function App() {
-  // stanja aplikacije 
+  // stanja aplikacije
   const [activities, setActivities] = useState([]); // seznam aktivnosti
   const [showForm, setShowForm] = useState(false); // ali se obrazec prikazuje
   const [editingActivity, setEditingActivity] = useState(null); // aktivnost, ki se ureja
@@ -180,9 +181,11 @@ function App() {
     setShowForm(false);
   };
 
-  // sortiranje aktivnosti in označevanje urgentnih
+  // sortiranje aktivnosti: NAJPREJ po datumu, POTEM brez datuma
   const sortedActivities = [...activities].sort((a, b) => {
     const now = new Date();
+    
+    // funkcija za preverjanje ali je aktivnost v naslednjih 48 urah
     const getIsSoon = (dateStr) => {
       if (!dateStr) return false;
       const date = new Date(dateStr);
@@ -194,12 +197,26 @@ function App() {
       return isSameDay || (diff < 1000 * 60 * 60 * 48 && diff > 0);
     };
 
-    const isSoonA = getIsSoon(a.date);
-    const isSoonB = getIsSoon(b.date);
-
-    if (isSoonA && !isSoonB) return -1;
-    if (!isSoonA && isSoonB) return 1;
-    return new Date(a.date) - new Date(b.date);
+    const hasDateA = !!a.date;
+    const hasDateB = !!b.date;
+    
+    // aktivnosti Z datumom gredo najprej
+    if (hasDateA && !hasDateB) return -1;
+    if (!hasDateA && hasDateB) return 1;
+    
+    // če oba IMATA datum, sortiraj po urgentnosti in potem po datumu
+    if (hasDateA && hasDateB) {
+      const isSoonA = getIsSoon(a.date);
+      const isSoonB = getIsSoon(b.date);
+      
+      if (isSoonA && !isSoonB) return -1;
+      if (!isSoonA && isSoonB) return 1;
+      
+      return new Date(a.date) - new Date(b.date);
+    }
+    
+    // če oba NIMATA datuma, ohrani obstoječi vrstni red (po ID-ju)
+    return a.id - b.id;
   });
 
   // --- JSX ---
