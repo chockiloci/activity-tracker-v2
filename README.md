@@ -49,7 +49,7 @@ mvnw spring-boot:run
 Backend bo dosegljiv na: **http://localhost:8080**
 
 
-### 3️⃣ Zaženi Frontend
+### Zaženi Frontend
 V **novem terminalu**:
 
 ```bash
